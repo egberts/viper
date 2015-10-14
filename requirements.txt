@@ -16,11 +16,11 @@ bitstring
 dnspython
 git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftool
 pyasn1
-M2Crypto
+git+https://gitlab.com/m2crypto/m2crypto.git
 pymisp
 django
 pypssl
 pypdns
 scandir
-pype32
+git+https://github.com/crackinglandia/pype32.git
 pbkdf2
