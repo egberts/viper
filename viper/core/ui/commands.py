@@ -740,8 +740,8 @@ class Commands(object):
         projects_path = os.path.join(os.getcwd(), 'projects')
 
         if not os.path.exists(projects_path):
-            self.log('info', "The projects directory does not exist yet")
-            return
+            self.log('info', "The projects directory does not exist yet, creating.")
+            os.makedirs(projects_path)
 
         if args.list:
             self.log('info', "Projects Available:")
