@@ -24,6 +24,5 @@ r2pipe
 git+https://github.com/crackinglandia/pype32.git#egg=pype32
 terminaltables
 virustotal-api
-terminaltables
 cffi
 git+https://github.com/pyca/cryptography.git
