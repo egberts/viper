@@ -8,12 +8,12 @@ import atexit
 import readline
 import traceback
 
-from viper.common.out import *
+from viper.common.out import print_error
+from viper.common.colors import cyan, magenta, white, bold, blue
 from viper.core.session import __sessions__
 from viper.core.plugins import __modules__
 from viper.core.project import __project__
 from viper.core.ui.commands import Commands
-from viper.core.storage import get_sample_path
 from viper.core.database import Database
 from viper.core.config import Config
 
@@ -24,7 +24,6 @@ try:
     input = raw_input
 except NameError:
     pass
-
 
 def logo():
     print("""         _
@@ -39,13 +38,11 @@ def logo():
     db = Database()
     count = db.get_sample_count()
 
-    # Handle the New database format
     try:
-        db.find('all', None)
+        db.find('all')
     except:
-        print_error("You need to update your viper database. Run 'python update.py -d'")
+        print_error("You need to update your Viper database. Run 'python update.py -d'")
         sys.exit()
-
 
     if __project__.name:
         name = __project__.name
@@ -53,10 +50,8 @@ def logo():
         name = 'default'
 
     print(magenta("You have " + bold(count)) +
-          magenta(" files in your " + bold(name) +
-          magenta(" repository".format(bold(name)))))
-    if cfg.autorun.enabled and len(cfg.autorun.commands) == 0:
-        print_warning("You have enabled autorun but not set any commands in viper.conf.")
+          magenta(" files in your " + bold(name)) +
+          magenta(" repository"))
 
 class Console(object):
 
@@ -93,7 +88,6 @@ class Console(object):
                 return None
 
         return data
-
 
     def stop(self):
         # Stop main loop.
@@ -158,9 +152,11 @@ class Console(object):
                     filename = __sessions__.current.file.name
                     if not Database().find(key='sha256', value=__sessions__.current.file.sha256):
                         stored = magenta(' [not stored]', True)
+
                 misp = ''
                 if __sessions__.current.misp_event:
                     misp = ' [MISP {}]'.format(__sessions__.current.misp_event.event_id)
+
                 prompt = (prefix + cyan('viper ', True) +
                           white(filename, True) + blue(misp, True) + stored + cyan(' > ', True))
             # Otherwise display the basic prompt.
@@ -243,6 +239,6 @@ class Console(object):
                             print("Command not recognized.")
                     except KeyboardInterrupt:
                         pass
-                    except Exception as e:
+                    except Exception:
                         print_error("The command {0} raised an exception:".format(bold(root)))
                         traceback.print_exc()
