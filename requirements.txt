@@ -32,7 +32,4 @@ virustotal-api==1.0.9
 http://pefile.googlecode.com/files/pefile-1.2.10-139.tar.gz#egg=pefile
 git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftool
 git+https://github.com/crackinglandia/pype32.git#egg=pype32
-terminaltables
-virustotal-api
-cffi
-git+https://github.com/pyca/cryptography.git
+git+https://github.com/pyca/cryptography.git#egg=cryptography
