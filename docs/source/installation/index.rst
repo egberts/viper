@@ -24,6 +24,7 @@ In addition you should install ssdeep with pydeep. After you downloaded the sour
     $ cd ssdeep-X.XX
     $ ./configure && make
     $ sudo make install
+    $ sudo apt-get install libfuzzy
     $ sudo pip install pydeep
 
 Viper can retrieve files remotely through `Tor`_, if you're interested in such feature you should install SocksiPy::
@@ -69,3 +70,11 @@ If everything worked out fine, you should be able to launch Viper's shell withou
 
 .. _official website: http://ssdeep.sourceforge.net
 .. _Tor: https://www.torproject.org
+
+Uninstall
+---------
+
+To uninstall Viper::
+
+    $ cd viper
+    $ sudo make uninstall
