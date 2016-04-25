@@ -292,8 +292,9 @@ class MISP(Module):
             attibutes.append(dict(curattr, **{'type': 'md5', 'value': md5}))
 
         distrib = curattr['distribution']
+        comment = curattr['comment']
         if not link[0]:
-            attibutes.append({'type': 'link', 'category': 'External analysis',
+            attibutes.append({'type': 'link', 'category': 'External analysis', 'comment': comment
                               'to_ids': False, 'distribution': distrib, 'value': link[1]})
         return attibutes
 
