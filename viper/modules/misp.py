@@ -282,7 +282,8 @@ class MISP(Module):
             misp_event.add_attribute('md5', md5, **curattr)
 
         if not link[0]:
-            misp_event.add_attribute('link', link[1], comment=curattr['comment'], distribution=curattr['distribution'])
+            curattr['to_ids'] = False
+            misp_event.add_attribute('link', link[1], **curattr)
         return misp_event
 
     def _populate(self, event, original_attributes):
@@ -499,6 +500,7 @@ class MISP(Module):
                 base_new_attributes[h] = {"category": a.category,
                                           "comment": u'{} - Xchecked via VT: {}'.format(a.comment, h),
                                           "to_ids": a.to_ids,
+                                          "Tag": a.Tag,
                                           "distribution": a.distribution}
 
         unk_vt_hashes = []
