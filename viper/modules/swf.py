@@ -5,7 +5,7 @@ import os
 import zlib
 import struct
 import tempfile
-from StringIO import StringIO
+from io import BytesIO, open
 
 try:
     import pylzma
@@ -17,6 +17,7 @@ from viper.common.out import cyan
 from viper.common.abstracts import Module
 from viper.common.utils import hexdump, get_md5
 from viper.core.session import __sessions__
+from viper.core.database import Database
 
 
 class SWF(Module):
@@ -31,7 +32,7 @@ class SWF(Module):
     def parse_swf(self):
         # Open an handle to the opened file so that we can more easily
         # walk through it.
-        swf = open(__sessions__.current.file.path, 'rb')
+        swf = BytesIO(__sessions__.current.file.data)
         # Extract the file header, so we can detect the compression.
         header = swf.read(3)
         # Extract the Flash version, not really important.
@@ -66,21 +67,21 @@ class SWF(Module):
         decompressed = None
 
         # Check if the file is already a decompressed Flash object.
-        if header == 'FWS':
+        if header == b'FWS':
             self.log('info', "The opened file doesn't appear to be compressed")
             return
         # Check if the file is compressed with zlib.
-        elif header == 'CWS':
+        elif header == b'CWS':
             self.log('info', "The opened file appears to be compressed with Zlib")
 
             # Open an handle on the compressed data.
-            compressed = StringIO(data)
+            compressed = BytesIO(data)
             # Skip the header.
             compressed.read(3)
             # Decompress and reconstruct the Flash object.
-            decompressed = 'FWS' + compressed.read(5) + zlib.decompress(compressed.read())
+            decompressed = b'FWS' + compressed.read(5) + zlib.decompress(compressed.read())
         # Check if the file is compressed with lzma.
-        elif header == 'ZWS':
+        elif header == b'ZWS':
             self.log('info', "The opened file appears to be compressed with Lzma")
 
             # We need an third party library to decompress this.
@@ -89,15 +90,15 @@ class SWF(Module):
                 return
 
             # Open and handle on the compressed data.
-            compressed = StringIO(data)
+            compressed = BytesIO(data)
             # Skip the header.
             compressed.read(3)
             # Decompress with pylzma and reconstruct the Flash object.
-            ## ZWS(LZMA)
-            ## | 4 bytes       | 4 bytes    | 4 bytes       | 5 bytes    | n bytes    | 6 bytes         |
-            ## | 'ZWS'+version | scriptLen  | compressedLen | LZMA props | LZMA data  | LZMA end marker |
-            decompressed = 'FWS' + compressed.read(5)
-            compressed.read(4) # skip compressedLen
+            # # ZWS(LZMA)
+            # # | 4 bytes       | 4 bytes    | 4 bytes       | 5 bytes    | n bytes    | 6 bytes         |
+            # # | 'ZWS'+version | scriptLen  | compressedLen | LZMA props | LZMA data  | LZMA end marker |
+            decompressed = b'FWS' + compressed.read(5)
+            compressed.read(4)  # skip compressedLen
             decompressed += pylzma.decompress(compressed.read())
 
         # If we obtained some decompressed data, we print it and eventually
@@ -117,8 +118,19 @@ class SWF(Module):
 
                 self.log('info', "Flash object dumped at {0}".format(dump_path))
 
+
+                # Set the parent-child relation between CWS-FWS
+                this_parent = __sessions__.current.file.sha256
                 # Directly open a session on the dumped Flash object.
                 __sessions__.new(dump_path)
+
+                db = Database()
+                # Make sure parents is in database
+                if not db.find(key='sha256', value=this_parent):
+                    self.log('error', "the parent file is not found in the database. ")
+                else:
+                    db.add_parent(__sessions__.current.file.sha256, this_parent)
+
 
     def run(self):
 
